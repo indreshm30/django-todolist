@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-todolist
+  labels:
+    app: django-todolist
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: django-todolist
+  template:
+    metadata:
+      labels:
+        app: django-todolist
+    spec:
+      containers:
+      - name: django-todolist
+        image: django-todolist:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DEBUG
+          value: "False"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: django-todolist-service
+spec:
+  selector:
+    app: django-todolist
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: LoadBalancer

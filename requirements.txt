@@ -20,3 +20,4 @@ sqlparse==0.5.3
     # via
     #   -r requirements.in
     #   django
+gunicorn==20.1.0
