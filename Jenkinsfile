@@ -1,72 +1,38 @@
 pipeline {
     agent any
-    
+
+    environment {
+        IMAGE_NAME = "django-todolist"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                echo 'Code checked out successfully'
+                checkout scm
             }
         }
-        
-        stage('Check Environment') {
+
+        stage('Docker Build') {
             steps {
-                script {
-                    if (isUnix()) {
-                        sh '''
-                            echo "Running on Unix/Linux"
-                            python3 --version || echo "Python3 not found"
-                            docker --version || echo "Docker not found"
-                        '''
-                    } else {
-                        bat '''
-                            echo Running on Windows
-                            docker --version
-                        '''
-                    }
-                }
+                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+                sh 'docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest'
             }
         }
-        
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    if (isUnix()) {
-                        sh '''
-                            docker build -t django-todolist:${BUILD_NUMBER} .
-                            docker tag django-todolist:${BUILD_NUMBER} django-todolist:latest
-                        '''
-                    } else {
-                        bat '''
-                            docker build -t django-todolist:%BUILD_NUMBER% .
-                            docker tag django-todolist:%BUILD_NUMBER% django-todolist:latest
-                        '''
-                    }
-                }
-            }
-        }
-        
+
         stage('List Docker Images') {
             steps {
-                script {
-                    if (isUnix()) {
-                        sh 'docker images | grep django-todolist || echo "No images found"'
-                    } else {
-                        bat 'docker images | findstr django-todolist'
-                    }
-                }
+                sh 'docker images | grep django-todolist'
             }
         }
     }
-    
+
     post {
-        always {
-            echo 'Pipeline completed!'
+        failure {
+            echo "❌ Pipeline failed! Please check logs above."
         }
         success {
-            echo 'Pipeline succeeded! Docker image built successfully.'
-        }
-        failure {
-            echo 'Pipeline failed! Check the logs above.'
+            echo "✅ Pipeline completed successfully!"
         }
     }
 }
