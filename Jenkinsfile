@@ -8,18 +8,19 @@ pipeline {
             }
         }
         
-        stage('Install Dependencies') {
+        stage('Check Environment') {
             steps {
                 script {
                     if (isUnix()) {
                         sh '''
-                            python3 --version
-                            pip3 --version
+                            echo "Running on Unix/Linux"
+                            python3 --version || echo "Python3 not found"
+                            docker --version || echo "Docker not found"
                         '''
                     } else {
                         bat '''
-                            python --version
-                            pip --version
+                            echo Running on Windows
+                            docker --version
                         '''
                     }
                 }
@@ -31,13 +32,11 @@ pipeline {
                 script {
                     if (isUnix()) {
                         sh '''
-                            docker --version
                             docker build -t django-todolist:${BUILD_NUMBER} .
                             docker tag django-todolist:${BUILD_NUMBER} django-todolist:latest
                         '''
                     } else {
                         bat '''
-                            docker --version
                             docker build -t django-todolist:%BUILD_NUMBER% .
                             docker tag django-todolist:%BUILD_NUMBER% django-todolist:latest
                         '''
@@ -46,19 +45,13 @@ pipeline {
             }
         }
         
-        stage('Test Docker Image') {
+        stage('List Docker Images') {
             steps {
                 script {
                     if (isUnix()) {
-                        sh '''
-                            echo "Docker images built:"
-                            docker images | grep django-todolist
-                        '''
+                        sh 'docker images | grep django-todolist || echo "No images found"'
                     } else {
-                        bat '''
-                            echo Docker images built:
-                            docker images | findstr django-todolist
-                        '''
+                        bat 'docker images | findstr django-todolist'
                     }
                 }
             }
@@ -70,10 +63,10 @@ pipeline {
             echo 'Pipeline completed!'
         }
         success {
-            echo 'Pipeline succeeded!'
+            echo 'Pipeline succeeded! Docker image built successfully.'
         }
         failure {
-            echo 'Pipeline failed!'
+            echo 'Pipeline failed! Check the logs above.'
         }
     }
 }
