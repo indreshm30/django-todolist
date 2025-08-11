@@ -1,26 +1,16 @@
 pipeline {
     agent any
-<<<<<<< HEAD
     environment {
         IMAGE_NAME = "django-todolist"
         IMAGE_TAG = "${BUILD_NUMBER}"
         CLUSTER_NAME = "django-cluster"
     }
-=======
-
-    environment {
-        IMAGE_NAME = "django-todolist"
-        IMAGE_TAG = "${BUILD_NUMBER}"
-    }
-
->>>>>>> 752358b91c80271c3ff4506b207bd627dea0cd9a
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-<<<<<<< HEAD
         stage('Docker Build') {
             steps {
                 sh '''
@@ -50,7 +40,7 @@ pipeline {
                 sh '''
                     echo "Deploying to Kubernetes..."
                     
-                    # Update deployment with new image tag (but keep IfNotPresent policy)
+                    # Update deployment with new image tag
                     sed -i "s|image: django-todolist:.*|image: django-todolist:${IMAGE_TAG}|g" k8s/deployment.yaml
                     
                     # Apply deployment
@@ -72,16 +62,9 @@ pipeline {
                     kubectl get services django-todolist-service
                     
                     echo "=== Application Health Check ==="
-                    # Wait for pods to be ready
                     kubectl wait --for=condition=ready pod -l app=django-todolist --timeout=300s
                     
-                    # Get service details
-                    SERVICE_TYPE=$(kubectl get service django-todolist-service -o jsonpath='{.spec.type}')
-                    echo "Service type: $SERVICE_TYPE"
-                    
-                    if [ "$SERVICE_TYPE" = "LoadBalancer" ]; then
-                        echo "LoadBalancer service created successfully"
-                    fi
+                    echo "✅ Application deployed and ready!"
                 '''
             }
         }
@@ -138,38 +121,13 @@ pipeline {
                 echo "=== Debugging Information ==="
                 kubectl get pods -l app=django-todolist
                 kubectl get events --sort-by='.lastTimestamp' | tail -10
-                kubectl describe deployment django-todolist
             '''
         }
         always {
-            // Clean up old Docker images to save space
             sh '''
                 echo "Cleaning up old Docker images..."
                 docker image prune -f || echo "No images to prune"
             '''
-=======
-
-        stage('Docker Build') {
-            steps {
-                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
-                sh 'docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest'
-            }
-        }
-
-        stage('List Docker Images') {
-            steps {
-                sh 'docker images | grep django-todolist'
-            }
-        }
-    }
-
-    post {
-        failure {
-            echo "❌ Pipeline failed! Please check logs above."
-        }
-        success {
-            echo "✅ Pipeline completed successfully!"
->>>>>>> 752358b91c80271c3ff4506b207bd627dea0cd9a
         }
     }
 }
