@@ -1,16 +1,26 @@
 pipeline {
     agent any
+<<<<<<< HEAD
     environment {
         IMAGE_NAME = "django-todolist"
         IMAGE_TAG = "${BUILD_NUMBER}"
         CLUSTER_NAME = "django-cluster"
     }
+=======
+
+    environment {
+        IMAGE_NAME = "django-todolist"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+    }
+
+>>>>>>> 752358b91c80271c3ff4506b207bd627dea0cd9a
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
+<<<<<<< HEAD
         stage('Docker Build') {
             steps {
                 sh '''
@@ -137,6 +147,29 @@ pipeline {
                 echo "Cleaning up old Docker images..."
                 docker image prune -f || echo "No images to prune"
             '''
+=======
+
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+                sh 'docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest'
+            }
+        }
+
+        stage('List Docker Images') {
+            steps {
+                sh 'docker images | grep django-todolist'
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "❌ Pipeline failed! Please check logs above."
+        }
+        success {
+            echo "✅ Pipeline completed successfully!"
+>>>>>>> 752358b91c80271c3ff4506b207bd627dea0cd9a
         }
     }
 }
