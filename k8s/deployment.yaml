@@ -17,6 +17,7 @@ spec:
       containers:
       - name: django-todolist
         image: django-todolist:latest
+        imagePullPolicy: IfNotPresent   # <-- important
         ports:
         - containerPort: 8000
         env:
@@ -35,3 +36,4 @@ spec:
       port: 80
       targetPort: 8000
   type: LoadBalancer
+
