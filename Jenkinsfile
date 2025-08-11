@@ -5,7 +5,7 @@ pipeline {
         DEPLOYMENT_NAME = "django-todolist"   // K8s Deployment name
         CONTAINER_NAME  = "django-todolist"   // Container name in deployment.yaml
         IMAGE_NAME      = "django-todolist:${BUILD_NUMBER}" // Docker image with build number
-        KIND_CLUSTER    = "kind"              // Kind cluster name
+        KIND_CLUSTER    = "django-cluster"              // Kind cluster name
         K8S_NAMESPACE   = "default"           // Namespace (change if needed)
     }
 
